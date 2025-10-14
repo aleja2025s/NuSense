@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NuSense AIgent - Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="dashboard-page">
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo-circle">🧠</div>
+                <h1>NuSense AIgent</h1>
+            </div>
+            <div class="user-section">
+                <span id="welcomeUser">Bienvenido</span>
+                <button onclick="logout()" class="logout-btn">Salir</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="dashboard-main">
+        <div class="dashboard-container">
+            <h2>🎯 Panel Principal</h2>
+            <p class="dashboard-subtitle">Selecciona la herramienta que necesitas:</p>
+            
+            <div class="dashboard-grid">
+                <div class="dashboard-card primary" onclick="openApp()">
+                    <div class="card-icon">🤖</div>
+                    <h3>NuSense AIgent</h3>
+                    <p>Herramienta principal de IA para servicio al cliente</p>
+                    <button class="card-btn">Abrir Herramienta</button>
+                </div>
+                
+                <div class="dashboard-card secondary" onclick="openMacros()">
+                    <div class="card-icon">📋</div>
+                    <h3>Base de Macros</h3>
+                    <p>Acceso directo a las 478+ macros disponibles</p>
+                    <button class="card-btn">Ver Macros</button>
+                </div>
+                
+                <div class="dashboard-card tertiary" onclick="openWedukas()">
+                    <div class="card-icon">📚</div>
+                    <h3>Recursos WEDUKAS</h3>
+                    <p>67 recursos educativos y enlaces útiles</p>
+                    <button class="card-btn">Explorar</button>
+                </div>
+                
+                <div class="dashboard-card info" onclick="openReadme()">
+                    <div class="card-icon">📖</div>
+                    <h3>Documentación</h3>
+                    <p>Guía completa y manual de usuario</p>
+                    <button class="card-btn">Leer Docs</button>
+                </div>
+            </div>
+            
+            <div class="dashboard-stats">
+                <div class="stat-item">
+                    <span class="stat-number">478+</span>
+                    <span class="stat-label">Macros ACQ</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">67</span>
+                    <span class="stat-label">Recursos WEDUKAS</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">5</span>
+                    <span class="stat-label">Estados Emocionales</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">100%</span>
+                    <span class="stat-label">Funcional</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Verificar autenticación
+        if (localStorage.getItem('nusense_logged_in') !== 'true') {
+            window.location.href = 'login.html';
+        }
+        
+        // Mostrar nombre de usuario
+        const username = localStorage.getItem('nusense_username') || 'Usuario';
+        document.getElementById('welcomeUser').textContent = `Hola, ${username}`;
+        
+        // Funciones de navegación
+        function openApp() {
+            window.location.href = 'app.html';
+        }
+        
+        function openMacros() {
+            alert('🔍 Funcionalidad: Ver macros en formato tabla\n📋 Las macros están integradas en la herramienta principal');
+            openApp();
+        }
+        
+        function openWedukas() {
+            alert('📚 Recursos WEDUKAS disponibles\n🔗 Enlaces educativos integrados en el sistema');
+        }
+        
+        function openReadme() {
+            alert('📖 Documentación completa\n📄 Ver archivo README.md en la carpeta del proyecto');
+        }
+        
+        function logout() {
+            localStorage.removeItem('nusense_logged_in');
+            localStorage.removeItem('nusense_username');
+            window.location.href = 'login.html?logout=true';
+        }
+    </script>
+    
+    <style>
+        .dashboard-page {
+            background: linear-gradient(135deg, #8B5CF6, #A855F7);
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .dashboard-main {
+            padding: 40px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .dashboard-container h2 {
+            color: white;
+            text-align: center;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .dashboard-subtitle {
+            color: #E9D5FF;
+            text-align: center;
+            font-size: 18px;
+            margin-bottom: 40px;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .dashboard-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        .dashboard-card h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: #E9D5FF;
+        }
+        
+        .dashboard-card p {
+            font-size: 16px;
+            margin-bottom: 25px;
+            opacity: 0.9;
+        }
+        
+        .card-btn {
+            background: #10B981;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .card-btn:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+        
+        .dashboard-stats {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            color: white;
+        }
+        
+        .stat-number {
+            display: block;
+            font-size: 32px;
+            font-weight: bold;
+            color: #10B981;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .dashboard-stats {
+                flex-wrap: wrap;
+                gap: 20px;
+            }
+        }
+    </style>
+</body>
+</html>
