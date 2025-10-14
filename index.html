@@ -3,13 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NuSense AIgent - Herramienta Principal</title>
+    <title>NuSense AIgent - Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>
 <body>
-    <script>
-        // Redirigir automáticamente a la URL principal
-        window.location.href = 'login.html?logout=true';
-    </script>
-    <p>Redirecting to NuSense AIgent...</p>
+    <!-- Header Principal -->
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo-circle">🧠</div>
+                <h1 class="main-title">NuSense AIgent</h1>
+            </div>
+            
+            <nav class="top-nav">
+                <button class="nav-btn">📖 Guía de Tono</button>
+                <button class="nav-btn">📊 Clasificación de Casos</button>
+                <button class="nav-btn">⚙️ IA Config</button>
+                <button class="nav-btn">👁️ Ejemplos Visuales</button>
+            </nav>
+            
+            <div class="user-section">
+                <span class="user-greeting">Hola, admin</span>
+                <button class="logout-btn">Salir</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navegación de Pestañas -->
+    <nav class="tab-navigation">
+        <button class="tab-btn active" data-tab="importante">IMPORTANTE</button>
+        <button class="tab-btn" data-tab="acq">ACQ</button>
+        <button class="tab-btn" data-tab="entrenamiento">ENTRENAMIENTO</button>
+        <button class="tab-btn" data-tab="herramientas">HERRAMIENTAS</button>
+        <button class="tab-btn" data-tab="cr">CR</button>
+        <button class="tab-btn" data-tab="qa">QA</button>
+        <button class="tab-btn" data-tab="recognition">RECOGNITION</button>
+        <button class="tab-btn" data-tab="crs">CR'S</button>
+        <button class="tab-btn" data-tab="tnps">t-NPS</button>
+        <button class="tab-btn" data-tab="producto">PRODUCTO OFER...</button>
+        <button class="tab-btn" data-tab="flujo">FLUJO DE REGIS...</button>
+        <button class="tab-btn" data-tab="secondary">Secondary Job</button>
+    </nav>
+
+    <!-- Contenido Principal -->
+    <main class="main-content">
+        <!-- Panel de Información del Caso -->
+        <div id="context-capture-panel" class="context-panel">
+            <div class="panel-header">
+                <h4>📝 Información del Caso</h4>
+                <button class="minimize-btn" onclick="togglePanel('context-capture-panel')">−</button>
+            </div>
+            
+            <div class="form-group">
+                <label>🎯 Contexto del Cliente:</label>
+                <textarea id="client-context-input" placeholder="Ejemplo: Cliente quiere registrarse pero no sabe qué documentos necesita..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>📂 Tipo de Caso:</label>
+                <div id="case-type-display" class="display-field">Selecciona en "Identificar tema del caso"</div>
+            </div>
+            
+            <div class="form-group">
+                <label>📋 Macro Seleccionada:</label>
+                <div id="macro-display" class="display-field">Selecciona una macro</div>
+            </div>
+            
+            <div class="action-buttons">
+                <button id="preview-response" class="btn-primary">👁️ Vista Previa</button>
+                <button id="clear-all-data" class="btn-danger">🗑️ Limpiar</button>
+            </div>
+            
+            <div id="status-indicator" class="status-error">❌ Información incompleta</div>
+        </div>
+
+        <!-- Área de Identificación de Caso -->
+        <div id="case-identification" class="section-panel">
+            <h2>🔍 Identificar Tema del Caso</h2>
+            
+            <!-- Contexto del Cliente -->
+            <div class="context-input-section">
+                <h3>1️⃣ Ingresar Contexto del Cliente</h3>
+                <textarea id="main-context-input" placeholder="Usuario se contacta indicando que no sabe cuáles son los documentos que aceptan para el registro"></textarea>
+                
+                <!-- Estados Emocionales -->
+                <div class="emotion-selector">
+                    <button class="emotion-btn" data-emotion="neutro">😐 Neutro</button>
+                    <button class="emotion-btn" data-emotion="confundido">😕 Confundido</button>
+                    <button class="emotion-btn selected" data-emotion="molesto">😠 Molesto</button>
+                    <button class="emotion-btn" data-emotion="satisfecho">😊 Satisfecho</button>
+                    <button class="emotion-btn" data-emotion="preocupado">😟 Preocupado</button>
+                </div>
+            </div>
+
+            <!-- Generación Inteligente -->
+            <div class="generation-section">
+                <h3>🤖 Generación Inteligente</h3>
+                
+                <div class="generation-controls">
+                    <button id="generate-ia-response" class="btn-generate">🤖 Generar Respuesta con IA</button>
+                    <button id="improve-response" class="btn-secondary">✨ Mejorar Respuesta</button>
+                </div>
+
+                <!-- Respuesta Generada -->
+                <div class="response-container">
+                    <h4>📝 Respuesta Generada por IA:</h4>
+                    <div id="ia-generated-response" class="response-area">
+                        Haz clic en "Generar Respuesta con IA" para crear una respuesta contextual...
+                    </div>
+                    
+                    <div class="response-actions">
+                        <button id="copy-response" class="btn-secondary">📋 Copiar Respuesta</button>
+                        <button id="use-response" class="btn-primary">✅ Usar Esta Respuesta</button>
+                    </div>
+                </div>
+
+                <!-- Macros Relacionadas -->
+                <div class="macros-container">
+                    <h4>📋 Macros Relacionadas:</h4>
+                    <div id="related-macros" class="macros-grid">
+                        <!-- Macros se cargarán dinámicamente -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="config.js"></script>
+    <script src="macros-data.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
