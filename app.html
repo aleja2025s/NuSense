@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NuSense AIgent - Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Training module libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- LiteLLM Integration -->
+    <script src="litellm-integration.js"></script>
+</head>
+<body class="app-body">
+    <!-- Nu Decoration Elements -->
+    <div class="nu-decoration"></div>
+    <div class="mobile-decoration"></div>
+    
+    <div class="app-container" id="appContainer">
+        <header class="app-header">
+            <div class="app-logo">
+                <div class="logo-icon">nu</div>
+                <h1>NuSense AIgent</h1>
+            </div>
+            <div class="header-actions">
+                <div class="resources-buttons">
+                    <button class="resource-btn" id="toneGuideBtn">📝 Guía de Tono</button>
+                    <button class="resource-btn" id="caseClassificationBtn">📊 Clasificación de Casos</button>
+                    <button class="resource-btn ai-config-btn" id="aiConfigBtn">🤖 IA Config</button>                    <button class="resource-btn" id="visualExamplesBtn">👁️ Ejemplos Visuales</button>
+                </div>
+                <span id="userGreeting"></span>
+                <button class="logout-btn" id="logoutBtn">Salir</button>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="tab-container">
+                <nav class="tab-nav">
+                    <button class="tab-btn main-tab active" data-tab="assistant">🧠 NuSense AIgent</button>
+                    <button class="tab-btn main-tab" data-tab="training">🎯 Sección Interactiva</button>
+                    <button class="tab-btn main-tab" data-tab="academy">🎓 Academia de Entrenamiento</button>
+                    <div class="sub-tabs">
+                        <button class="tab-btn sub-tab" data-tab="macros">📋 Macros</button>
+                        <button class="tab-btn sub-tab" data-tab="wedukas">📚 Wedukas</button>
+                    </div>
+                </nav>
+
+                <!-- Assistant Tab -->
+                <div class="tab-content">
+                    <div class="tab-panel active" id="assistant">
+                        <div class="assistant-step">
+                            <div class="step-header">
+                                <div class="step-number">1</div>
+                                <h3 class="step-title">Ingresar Contexto del Cliente</h3>
+                            </div>
+                            <textarea 
+                                class="context-input" 
+                                id="contextInput"
+                                placeholder="Pega aquí la consulta del cliente (chat, email, etc.)..."></textarea>
+                            <div class="emotion-selector">
+                                <button class="emotion-btn" data-emotion="neutro">😐 Neutro</button>
+                                <button class="emotion-btn" data-emotion="confundido">😕 Confundido</button>
+                                <button class="emotion-btn" data-emotion="molesto">😠 Molesto</button>
+                                <button class="emotion-btn" data-emotion="satisfecho">😊 Satisfecho</button>
+                                <button class="emotion-btn" data-emotion="preocupado">😰 Preocupado</button>
+                            </div>
+                        </div>
+
+                        <div class="assistant-step">
+                            <div class="step-header">
+                                <div class="step-number">2</div>
+                                <h3 class="step-title">Identificar Tema del Caso</h3>
+                            </div>
+                            <div class="topics-grid" id="topicsGrid">
+                                <div class="topic-card" data-topic="inscripcion-registro">
+                                    <div class="topic-title">Inscripción y Registro</div>
+                                    <div class="topic-description">Procesos de registro, validación y onboarding de nuevos clientes</div>
+                                </div>
+                                <div class="topic-card" data-topic="mgm-referidos">
+                                    <div class="topic-title">Invitar Amigos (MGM)</div>
+                                    <div class="topic-description">Programa de referidos y beneficios por invitar amigos</div>
+                                </div>
+                                <div class="topic-card" data-topic="activacion-productos">
+                                    <div class="topic-title">Activación de Productos</div>
+                                    <div class="topic-description">Activación y configuración de productos financieros</div>
+                                </div>
+                                <div class="topic-card" data-topic="nucontrol-registro">
+                                    <div class="topic-title">NuControl</div>
+                                    <div class="topic-description">Tarjeta de crédito NuControl - registro y configuración</div>
+                                </div>
+                                <div class="topic-card" data-topic="data-policy">
+                                    <div class="topic-title">Política de Datos</div>
+                                    <div class="topic-description">Consultas sobre tratamiento de datos personales</div>
+                                </div>
+                                <div class="topic-card" data-topic="problemas-registro">
+                                    <div class="topic-title">Problemas de Registro</div>
+                                    <div class="topic-description">Errores técnicos y dificultades en el proceso de registro</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="assistant-step">
+                            <div class="step-header">
+                                <div class="step-number">3</div>
+                                <h3 class="step-title">Proceso Sugerido</h3>
+                            </div>
+                            <div class="process-summary" id="processSummary">
+                                <p>Selecciona un tema para ver el procedimiento recomendado.</p>
+                            </div>
+                        </div>
+
+                        <div class="assistant-step">
+                            <div class="step-header">
+                                <div class="step-number">4</div>
+                                <h3 class="step-title">Generar Respuesta</h3>
+                            </div>
+                            <button class="generate-btn" id="generateBtn" disabled>
+                                🤖 Generar Sugerencia de Respuesta
+                            </button>
+                            <div class="response-container" id="responseContainer" style="display: none;">
+                                <div class="response-text" id="responseText"></div>
+                                <div class="response-actions">
+                                    <button class="copy-btn" id="copyBtn">📋 Copiar</button>
+                                    <button class="tone-btn" data-tone="corto">✂️ Más Corto</button>
+                                    <button class="tone-btn" data-tone="formal">👔 Más Formal</button>
+                                    <button class="tone-btn" data-tone="empatico">❤️ Más Empático</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Macros Tab -->
+                    <div class="tab-panel" id="macros">
+                        <div class="search-container">
+                            <input type="text" class="search-input" id="macrosSearch" placeholder="Buscar macros...">
+                            <select class="filter-select" id="macrosFilter">
+                                <option value="">Todos los motivos</option>
+                                <option value="inscripcion-registro">Inscripción y Registro</option>
+                                <option value="mgm-referidos">Invitar Amigos</option>
+                                <option value="activacion-productos">Activación de Productos</option>
+                                <option value="nucontrol-registro">NuControl</option>
+                            </select>
+                        </div>
+                        <table class="macros-table">
+                            <thead>
+                                <tr>
+                                    <th>Título</th>
+                                    <th>Motivo</th>
+                                    <th>Última Actualización</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="macrosTableBody">
+                                <!-- Populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Wedukas Tab -->
+                    <div class="tab-panel" id="wedukas">
+                        <div class="search-container">
+                            <input type="text" class="search-input" id="wedukasSearch" placeholder="Buscar documentos...">
+                            <select class="filter-select" id="wedukasFilter">
+                                <option value="">Todas las categorías</option>
+                                <option value="vanguard-venus">Vanguard/Venus</option>
+                                <option value="nu">Nu</option>
+                            </select>
+                        </div>
+                        <div class="documents-grid" id="documentsGrid">
+                            <!-- Populated by JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Training Tab -->
+                    <div class="tab-panel" id="training">
+                        <!-- Login Screen -->
+                        <div class="training-screen active" id="login-screen">
+                            <div class="screen-content">
+                                <div class="training-header">
+                                    <h2>🎯 Módulo de Entrenamiento</h2>
+                                    <p>Practica la clasificación de casos y mejora tus respuestas</p>
+                                </div>
+                                <div class="login-form">
+                                    <label for="agent-name">Ingresa tu nombre:</label>
+                                    <input type="text" id="agent-name" placeholder="Tu nombre completo">
+                                    <button onclick="initializeSimulation()" class="training-btn primary">Iniciar Entrenamiento</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Welcome Screen -->
+                        <div class="training-screen" id="welcome-screen">
+                            <div class="screen-content">
+                                <div class="training-header">
+                                    <h2>¡Bienvenido/a, <span id="welcome-name"></span>!</h2>
+                                    <p>Estás a punto de iniciar el módulo de entrenamiento</p>
+                                </div>
+                                <div class="welcome-info">
+                                    <div class="info-card">
+                                        <h3>🎯 Objetivo</h3>
+                                        <p>Practicar la clasificación de casos y aprender la diferencia entre respuestas empáticas y genéricas.</p>
+                                    </div>
+                                    <div class="info-card">
+                                        <h3>📋 Dinámica</h3>
+                                        <ul>
+                                            <li>Se presentarán 5 casos de clientes</li>
+                                            <li>Debes clasificar cada caso correctamente</li>
+                                            <li>Recibirás feedback inmediato</li>
+                                            <li>Verás ejemplos de respuestas humanas vs robóticas</li>
+                                        </ul>
+                                    </div>
+                                    <div class="info-card">
+                                        <h3>🏆 Resultados</h3>
+                                        <p>Al final recibirás un resumen de tu desempeño. ¡Si obtienes 5/5, podrás descargar tu certificado!</p>
+                                    </div>
+                                </div>
+                                <button onclick="startTrainingQuiz()" class="training-btn primary">Comenzar</button>
+                            </div>
+                        </div>
+
+                        <!-- Case Study Screen -->
+                        <div class="training-screen" id="case-study-screen">
+                            <div class="screen-content">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="progress-fill"></div>
+                                    <span class="progress-text" id="progress-text">Pregunta 1 de 5</span>
+                                </div>
+                                <div class="case-content">
+                                    <h3>📞 Caso del Cliente</h3>
+                                    <div class="client-case">
+                                        <div class="client-info">
+                                            <strong>Cliente:</strong> <span id="client-name"></span>
+                                        </div>
+                                        <div class="client-message">
+                                            <strong>Consulta:</strong> <span id="client-message"></span>
+                                        </div>
+                                        <div class="mission">
+                                            <strong>Tu misión:</strong> <span id="mission-text"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button onclick="showQuiz()" class="training-btn primary">Clasificar Caso</button>
+                            </div>
+                        </div>
+
+                        <!-- Quiz Screen -->
+                        <div class="training-screen" id="quiz-screen">
+                            <div class="screen-content">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="progress-fill-quiz"></div>
+                                    <span class="progress-text" id="progress-text-quiz">Pregunta 1 de 5</span>
+                                </div>
+                                <div class="quiz-content">
+                                    <h3>🤔 ¿Cómo clasificarías este caso?</h3>
+                                    <div class="quiz-options" id="quiz-options">
+                                        <!-- Opciones se generan dinámicamente -->
+                                    </div>
+                                </div>
+                                <button onclick="submitAnswer()" class="training-btn primary" id="submit-btn" disabled>Confirmar Respuesta</button>
+                            </div>
+                        </div>
+
+                        <!-- Feedback Screen -->
+                        <div class="training-screen" id="feedback-screen">
+                            <div class="screen-content">
+                                <div class="feedback-content">
+                                    <div class="feedback-result" id="feedback-result">
+                                        <!-- Resultado se muestra aquí -->
+                                    </div>
+                                    <div class="feedback-explanation" id="feedback-explanation">
+                                        <!-- Explicación se muestra aquí -->
+                                    </div>
+                                </div>
+                                <button onclick="showResponse()" class="training-btn primary">Ver Comparación de Respuestas</button>
+                            </div>
+                        </div>
+
+                        <!-- Response Comparison Screen -->
+                        <div class="training-screen" id="response-screen">
+                            <div class="screen-content">
+                                <div class="response-comparison">
+                                    <h3>💬 Comparación de Respuestas</h3>
+                                    <div class="response-cards">
+                                        <div class="response-card robotic">
+                                            <h4>🤖 Respuesta Robótica</h4>
+                                            <p id="robotic-response"></p>
+                                            <div class="response-label negative">❌ Evitar</div>
+                                        </div>
+                                        <div class="response-card human">
+                                            <h4>😊 Respuesta Humana</h4>
+                                            <p id="human-response"></p>
+                                            <div class="response-label positive">✅ Usar</div>
+                                        </div>
+                                    </div>
+                                    <div class="learnings">
+                                        <h4>💡 Puntos Clave</h4>
+                                        <ul id="learning-points"></ul>
+                                    </div>
+                                </div>
+                                <button onclick="nextScenario()" class="training-btn primary" id="next-btn">Siguiente Pregunta</button>
+                            </div>
+                        </div>
+
+                        <!-- Summary Screen -->
+                        <div class="training-screen" id="summary-screen">
+                            <div class="screen-content">
+                                <div class="summary-content">
+                                    <h2>📊 Resultados del Entrenamiento</h2>
+                                    <div class="score-summary">
+                                        <div class="score-circle">
+                                            <span class="score-number" id="final-score">0</span>
+                                            <span class="score-total">/5</span>
+                                        </div>
+                                        <p class="score-message" id="score-message"></p>
+                                    </div>
+                                    <div class="incorrect-answers" id="incorrect-summary" style="display: none;">
+                                        <h3>📝 Repaso de Respuestas Incorrectas</h3>
+                                        <div id="incorrect-list"></div>
+                                    </div>
+                                    <div class="action-buttons">
+                                        <button onclick="downloadResults()" class="training-btn secondary">📥 Descargar Resultados (CSV)</button>
+                                        <button onclick="restartSimulation()" class="training-btn primary">🔄 Repetir Entrenamiento</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Certificate Screen -->
+                        <div class="training-screen" id="certificate-screen">
+                            <div class="screen-content">
+                                <div class="certificate-content" id="certificate-content">
+                                    <div class="certificate-compact">
+                                        <!-- Nu Branding Decorations -->
+                                        <div class="cert-decoration phone"></div>
+                                        <div class="cert-decoration heart">💜</div>
+                                        
+                                        <div class="certificate-inner">
+                                            <!-- Header -->
+                                            <div class="cert-header">
+                                                <div class="cert-logo">nu</div>
+                                                <h1>Certificado de Excelencia</h1>
+                                            </div>
+                                            
+                                            <!-- Main content -->
+                                            <div class="cert-body">
+                                                <div class="cert-badge">
+                                                    <div class="badge-icon">🏆</div>
+                                                    <div class="badge-score">5/5</div>
+                                                </div>
+                                                
+                                                <div class="cert-text">
+                                                    <p class="cert-name" id="certificate-name"></p>
+                                                    <p class="cert-achievement">Dominio Perfecto en Clasificación de Casos</p>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Footer -->
+                                            <div class="cert-footer">
+                                                <div class="cert-date" id="certificate-date"></div>
+                                                <div class="cert-signature">NuSense AIgent</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="action-buttons">
+                                    <button onclick="downloadCertificate()" class="training-btn secondary">📄 Descargar PDF</button>
+                                    <button onclick="downloadResults()" class="training-btn secondary">📥 Descargar CSV</button>
+                                    <button onclick="restartSimulation()" class="training-btn primary">🔄 Nuevo Entrenamiento</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Academy Tab -->
+                    <div class="tab-panel" id="academy">
+                        <div class="academy-container">
+                            <div class="academy-header">
+                                <h2>🎓 Academia de Entrenamiento ACQ</h2>
+                                <p>Plataforma de aprendizaje interactivo con 5 actividades especializadas</p>
+                            </div>
+
+                            <!-- Academy Navigation -->
+                            <nav class="academy-nav">
+                                <button class="academy-tab active" data-activity="clasifica">🎲 Clasifica el Caso</button>
+                                <button class="academy-tab" data-activity="humaniza">💬 Humaniza la Macro</button>
+                                <button class="academy-tab" data-activity="aventura">🔍 Aventura de Soporte</button>
+                                <button class="academy-tab" data-activity="conocimiento">✨ Ronda de Conocimiento</button>
+                                <button class="academy-tab" data-activity="memoria">🧠 Retos de Memoria</button>
+                            </nav>
+
+                            <!-- Activity: Clasifica el Caso -->
+                            <section id="clasifica" class="academy-activity active">
+                                <div class="activity-header">
+                                    <h3>🎲 Clasifica el Caso</h3>
+                                    <p>Entrena tu precisión y velocidad para clasificar consultas de clientes</p>
+                                </div>
+                                <div class="case-container">
+                                    <div class="client-case-card">
+                                        <h4>Caso del Cliente:</h4>
+                                        <p id="case-text" class="case-text">Cargando caso...</p>
+                                    </div>
+                                    <div class="classification-options" id="classification-options">
+                                        <!-- Opciones generadas dinámicamente -->
+                                    </div>
+                                    <div class="case-feedback" id="case-feedback" style="display: none;">
+                                        <p id="case-explanation"></p>
+                                    </div>
+                                    <button id="next-case-btn" class="academy-btn primary" onclick="loadRandomCase()" style="display: none;">Siguiente Caso</button>
+                                </div>
+                            </section>
+
+                            <!-- Activity: Humaniza la Macro -->
+                            <section id="humaniza" class="academy-activity">
+                                <div class="activity-header">
+                                    <h3>💬 Humaniza la Macro</h3>
+                                    <p>Practica la redacción de respuestas empáticas a partir de plantillas</p>
+                                </div>
+                                <div class="humanize-container">
+                                    <div class="scenario-card">
+                                        <h4>Consulta del Cliente:</h4>
+                                        <p id="client-query" class="client-query">Cargando consulta...</p>
+                                    </div>
+                                    <div class="macro-card">
+                                        <h4>Macro Actual (Robótica):</h4>
+                                        <p id="robotic-macro" class="robotic-macro">Cargando macro...</p>
+                                    </div>
+                                    <div class="user-input-section">
+                                        <h4>Tu Versión Humanizada:</h4>
+                                        <textarea id="user-humanized" placeholder="Escribe aquí tu versión mejorada y empática..." rows="4"></textarea>
+                                        <button id="compare-btn" class="academy-btn primary" onclick="showHumanizedComparison()">Comparar con Ejemplo</button>
+                                    </div>
+                                    <div class="comparison-result" id="comparison-result" style="display: none;">
+                                        <h4>Ejemplo de Respuesta Ideal:</h4>
+                                        <p id="ideal-response" class="ideal-response"></p>
+                                        <button class="academy-btn secondary" onclick="loadRandomHumanizeCase()">Nuevo Caso</button>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <!-- Activity: Aventura de Soporte -->
+                            <section id="aventura" class="academy-activity">
+                                <div class="activity-header">
+                                    <h3>🔍 Aventura de Soporte</h3>
+                                    <p>Simula conversaciones reales y ve el impacto de tus decisiones</p>
+                                </div>
+                                <div class="adventure-container">
+                                    <!-- Adventure Selection Menu -->
+                                    <div class="adventure-menu" id="adventure-menu">
+                                        <h4>Elige tu Propia Aventura de Soporte</h4>
+                                        <p>Cada decisión impacta la conversación. Elige la mejor respuesta en cada paso para guiar al cliente a una solución exitosa.</p>
+                                        <div class="scenario-cards">
+                                            <div class="scenario-card" onclick="selectAdventureScenario('frustrated_client')">
+                                                <div class="scenario-icon">😤</div>
+                                                <h5>Cliente Frustrado</h5>
+                                                <p>María está molesta porque no puede activar su tarjeta</p>
+                                                <span class="scenario-difficulty medium">Intermedio</span>
+                                            </div>
+                                            <div class="scenario-card" onclick="selectAdventureScenario('confused_prospect')">
+                                                <div class="scenario-icon">🤔</div>
+                                                <h5>Prospecto Confundido</h5>
+                                                <p>Carlos no entiende qué productos ofrece Nu</p>
+                                                <span class="scenario-difficulty easy">Fácil</span>
+                                            </div>
+                                            <div class="scenario-card" onclick="selectAdventureScenario('payment_issue')">
+                                                <div class="scenario-icon">💳</div>
+                                                <h5>Problema de Pago</h5>
+                                                <p>Ana tiene un pago que no se procesó correctamente</p>
+                                                <span class="scenario-difficulty hard">Avanzado</span>
+                                            </div>
+                                            <div class="scenario-card" onclick="selectAdventureScenario('cross_sell_opportunity')">
+                                                <div class="scenario-icon">🎯</div>
+                                                <h5>Oportunidad de Venta</h5>
+                                                <p>Luis pregunta sobre productos adicionales</p>
+                                                <span class="scenario-difficulty medium">Intermedio</span>
+                                            </div>
+                                        </div>
+                                        <button class="academy-btn secondary" onclick="selectRandomAdventure()">🎲 Escenario Aleatorio</button>
+                                    </div>
+                                    
+                                    <!-- Adventure Progress -->
+                                    <div class="adventure-progress" id="adventure-progress" style="display: none;">
+                                        <div class="progress-info">
+                                            <h4 id="adventure-scenario-title">Escenario en Progreso</h4>
+                                            <div class="progress-indicators">
+                                                <span class="step-indicator" id="step-indicator">Paso 1</span>
+                                                <span class="client-mood" id="client-mood">😐 Neutral</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Adventure Story -->
+                                    <div class="story-container" id="story-container" style="display: none;">
+                                        <div class="story-card">
+                                            <div class="client-avatar" id="client-avatar">👤</div>
+                                            <div class="story-content">
+                                                <h4 id="adventure-title">Título del Escenario</h4>
+                                                <div class="story-bubble">
+                                                    <p id="adventure-text" class="story-text">Texto de la historia...</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="choices-section">
+                                            <h5>¿Cómo respondes?</h5>
+                                            <div class="adventure-choices" id="adventure-choices">
+                                                <!-- Opciones generadas dinámicamente -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Adventure Result -->
+                                    <div class="adventure-result" id="adventure-result" style="display: none;">
+                                        <div class="result-card">
+                                            <div class="result-icon" id="result-icon">🎉</div>
+                                            <h4 id="result-title">Resultado</h4>
+                                            <p id="result-text" class="result-description"></p>
+                                            <div class="result-lesson">
+                                                <h6>💡 Lección Aprendida:</h6>
+                                                <p id="result-lesson"></p>
+                                            </div>
+                                            <div class="result-actions">
+                                                <button class="academy-btn primary" onclick="startNewAdventure()">Nueva Aventura</button>
+                                                <button class="academy-btn secondary" onclick="showAdventureMenu()">Elegir Escenario</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <!-- Activity: Ronda de Conocimiento -->
+                            <section id="conocimiento" class="academy-activity">
+                                <div class="activity-header">
+                                    <h3>✨ Ronda de Conocimiento</h3>
+                                    <p>Evalúa tu conocimiento sobre productos y procesos internos</p>
+                                </div>
+                                <div class="quiz-container">
+                                    <div class="quiz-progress">
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" id="quiz-progress-fill"></div>
+                                        </div>
+                                        <span class="progress-text" id="quiz-progress-text">Pregunta 1 de 5</span>
+                                    </div>
+                                    <div class="question-card">
+                                        <h4 id="quiz-question">Cargando pregunta...</h4>
+                                        <div class="quiz-options" id="academy-quiz-options">
+                                            <!-- Opciones generadas dinámicamente -->
+                                        </div>
+                                    </div>
+                                    <div class="quiz-feedback" id="quiz-feedback" style="display: none;">
+                                        <p id="quiz-explanation"></p>
+                                        <button id="next-question-btn" class="academy-btn primary" onclick="nextQuizQuestion()">Siguiente Pregunta</button>
+                                    </div>
+                                    <div class="quiz-results" id="quiz-results" style="display: none;">
+                                        <h4>¡Quiz Completado!</h4>
+                                        <div class="final-score">
+                                            <span id="final-quiz-score">0</span> / <span id="total-questions">5</span>
+                                        </div>
+                                        <p id="quiz-message"></p>
+                                        <button class="academy-btn primary" onclick="startQuiz()">Reiniciar Quiz</button>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <!-- Activity: Retos de Memoria -->
+                            <section id="memoria" class="academy-activity">
+                                <div class="activity-header">
+                                    <h3>🧠 Retos de Memoria</h3>
+                                    <p>Entrena tu capacidad de retener información bajo presión con múltiples desafíos</p>
+                                </div>
+                                <div class="memory-container">
+                                    <!-- Memory Challenge Menu -->
+                                    <div class="memory-menu" id="memory-menu">
+                                        <h4>Selecciona tu desafío:</h4>
+                                        <div class="memory-challenges">
+                                            <div class="challenge-card" onclick="startMemoryChallenge('speed')">
+                                                <div class="challenge-icon">⚡</div>
+                                                <h5>Reto de Velocidad</h5>
+                                                <p>5 casos en 5 segundos cada uno</p>
+                                                <span class="difficulty easy">Fácil</span>
+                                            </div>
+                                            <div class="challenge-card" onclick="startMemoryChallenge('precision')">
+                                                <div class="challenge-icon">🎯</div>
+                                                <h5>Reto de Precisión</h5>
+                                                <p>3 casos complejos en 7 segundos</p>
+                                                <span class="difficulty medium">Medio</span>
+                                            </div>
+                                            <div class="challenge-card" onclick="startMemoryChallenge('extreme')">
+                                                <div class="challenge-icon">🔥</div>
+                                                <h5>Reto Extremo</h5>
+                                                <p>10 casos en 3 segundos cada uno</p>
+                                                <span class="difficulty hard">Difícil</span>
+                                            </div>
+                                            <div class="challenge-card" onclick="startMemoryChallenge('marathon')">
+                                                <div class="challenge-icon">🏃</div>
+                                                <h5>Maratón Mental</h5>
+                                                <p>15 casos aleatorios variando tiempo</p>
+                                                <span class="difficulty expert">Experto</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Challenge Progress -->
+                                    <div class="memory-progress" id="memory-progress" style="display: none;">
+                                        <div class="challenge-info">
+                                            <h4 id="challenge-title">Reto en Progreso</h4>
+                                            <div class="progress-stats">
+                                                <span id="current-challenge">Caso 1</span> de <span id="total-challenges">5</span>
+                                                <span class="score">Aciertos: <span id="memory-score">0</span></span>
+                                            </div>
+                                        </div>
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" id="memory-progress-fill"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Memory Reading Phase -->
+                                    <div class="memory-reading" id="memory-reading" style="display: none;">
+                                        <div class="timer-bar">
+                                            <div class="timer-fill" id="timer-fill"></div>
+                                            <span class="timer-text" id="timer-text">7s</span>
+                                        </div>
+                                        <div class="memory-case-card">
+                                            <h4>Memoriza este caso:</h4>
+                                            <p id="memory-case-text" class="memory-case-text"></p>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Memory Question Phase -->
+                                    <div class="memory-question" id="memory-question" style="display: none;">
+                                        <h4>¿Cómo clasificarías el caso que acabas de leer?</h4>
+                                        <div class="memory-options" id="memory-options">
+                                            <!-- Opciones generadas dinámicamente -->
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Memory Result -->
+                                    <div class="memory-result" id="memory-result" style="display: none;">
+                                        <h4 id="memory-result-title"></h4>
+                                        <p id="memory-result-text"></p>
+                                        <div class="result-actions">
+                                            <button class="academy-btn secondary" onclick="continueMemoryChallenge()">Siguiente Caso</button>
+                                            <button class="academy-btn primary" onclick="showMemoryMenu()">Volver al Menú</button>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Final Results -->
+                                    <div class="memory-final-results" id="memory-final-results" style="display: none;">
+                                        <div class="final-results-card">
+                                            <h4>¡Desafío Completado!</h4>
+                                            <div class="final-score-display">
+                                                <div class="score-circle">
+                                                    <span id="final-memory-score">0</span>/<span id="final-memory-total">5</span>
+                                                </div>
+                                            </div>
+                                            <p id="memory-performance-message"></p>
+                                            <div class="performance-stats">
+                                                <div class="stat">
+                                                    <span class="stat-label">Precisión:</span>
+                                                    <span class="stat-value" id="memory-accuracy">0%</span>
+                                                </div>
+                                                <div class="stat">
+                                                    <span class="stat-label">Tiempo Promedio:</span>
+                                                    <span class="stat-value" id="memory-avg-time">0s</span>
+                                                </div>
+                                            </div>
+                                            <div class="final-actions">
+                                                <button class="academy-btn secondary" onclick="retryMemoryChallenge()">Repetir Desafío</button>
+                                                <button class="academy-btn primary" onclick="showMemoryMenu()">Nuevo Desafío</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modales de Recursos -->
+    
+    <!-- Modal Guía de Tono -->
+    <div class="modal" id="toneGuideModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📝 Guía de Tono Nu</h2>
+                <button class="modal-close" onclick="closeModal('toneGuideModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="tone-section do-section">
+                    <h4>✅ Qué debemos HACER</h4>
+                    <ul>
+                        <li><strong>Ser Cercano:</strong> Usa el nombre del cliente, tutea, habla como un amigo.</li>
+                        <li><strong>Ser Simple y Didáctico:</strong> Explica fácil, como si enseñaras a un familiar.</li>
+                        <li><strong>Ser Humano y Empático:</strong> Valida sus sentimientos. Usa frases como "Entiendo cómo te sientes" o "Lamento que esto haya pasado".</li>
+                        <li><strong>Ser Transparente:</strong> Explica el porqué de las cosas de forma honesta.</li>
+                        <li><strong>Ser Dueño del Problema:</strong> Usa frases como "Yo te ayudo" o "Vamos a resolverlo juntos".</li>
+                        <li><strong>Ser Ágil:</strong> Ofrece soluciones y próximos pasos claros.</li>
+                    </ul>
+                </div>
+                <div class="tone-section dont-section">
+                    <h4>❌ Qué debemos EVITAR</h4>
+                    <ul>
+                        <li><strong>Ser Robot o Cortante:</strong> No des respuestas de "sí/no". Evita el lenguaje técnico.</li>
+                        <li><strong>Ser Indiferente:</strong> Nunca ignores lo que el cliente siente.</li>
+                        <li><strong>Ser Inseguro:</strong> Evita frases como "creo que", "tal vez" o "me parece".</li>
+                        <li><strong>Culpar al Cliente:</strong> Jamás uses un tono acusatorio.</li>
+                        <li><strong>Usar Diminutivos:</strong> Evita usar palabras como "momentico", "raticos" o "ahorita".</li>
+                        <li><strong>Ser Negativo:</strong> En lugar de decir "no se puede", ofrece alternativas.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Clasificación de Casos -->
+    <div class="modal" id="caseClassificationModal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h2>📊 Clasificación de Casos</h2>
+                <button class="modal-close" onclick="closeModal('caseClassificationModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="classification-legend">
+                    <span class="allowed">✅ Permitido para Vanguard/Venus</span>
+                    <span class="not-allowed">❌ No permitido para Vanguard/Venus (Solo Nu)</span>
+                </div>
+                
+                <div class="case-list">
+                    <div class="case-item allowed">
+                        <h5>acquisition.first-time-application ✅</h5>
+                        <p>Prospectos que desean aplicar por primera vez y solicitan información sobre requisitos para abrir un producto con Nu, o requieren ayuda para inscribirse. También incluye a prospectos invitados con dudas sobre su proceso de registro o el estado de su invitación.</p>
+                    </div>
+                    
+                    <div class="case-item allowed">
+                        <h5>acquisition_fee_card_general_doubts ✅</h5>
+                        <p>Prospectos que piden información sobre la tarjeta NuControl, necesitan ayuda con el registro o desean saber el estado de su invitación para este producto.</p>
+                    </div>
+                    
+                    <div class="case-item allowed">
+                        <h5>acquisition.cdts_doubts ✅</h5>
+                        <p>Prospectos (no clientes) que preguntan sobre los requisitos para invertir en un CDT, documentos aceptados, y el flujo de registro en la App.</p>
+                    </div>
+                    
+                    <div class="case-item allowed">
+                        <h5>acquisition.soft-decline ✅</h5>
+                        <p>Prospectos declinados por el algoritmo que preguntan por el estado de su proceso o las razones de la declinación. También aplica a clientes de Cuenta de Ahorros que preguntan por qué no se les ofreció la Tarjeta de Crédito.</p>
+                    </div>
+                    
+                    <div class="case-item not-allowed">
+                        <h5>acquisition.invite ❌</h5>
+                        <p>Problemas relacionados con la actualización y descarga de la app, errores durante el proceso de registro (en la app o página web) y problemas con el registro para usuarios invitados.</p>
+                    </div>
+                    
+                    <div class="case-item allowed">
+                        <h5>acquisition.opt-out ✅</h5>
+                        <p>Prospectos (no clientes) que ya no desean continuar con el proceso de registro porque se arrepintieron o ya no les interesa el producto.</p>
+                    </div>
+                    
+                    <div class="case-item allowed">
+                        <h5>acquisition.unwanted-product-offer ✅</h5>
+                        <p>Usuarios que terminan con un producto que no deseaban porque no entendieron la oferta durante el registro.</p>
+                    </div>
+                    
+                    <div class="case-item allowed">
+                        <h5>acquisition.new-products-request ✅</h5>
+                        <p>Prospectos o clientes que preguntan si Nu ofrece otros productos como préstamos, inversiones, tarjetas amparadas, etc.</p>
+                    </div>
+                    
+                    <div class="case-item not-allowed">
+                        <h5>regsol.pep-edd-contacts ❌</h5>
+                        <p>Contactos de prospectos relacionados con solicitudes de información adicional hechas por el equipo de Regsol.</p>
+                    </div>
+                    
+                    <div class="case-item allowed">
+                        <h5>acquisition.cross-sell ✅</h5>
+                        <p>Clientes activos que tienen una oferta para un producto adicional y solicitan ayuda, o desean saber el estado de su oferta.</p>
+                    </div>
+                    
+                    <div class="case-item allowed">
+                        <h5>other.reactivate-request-savings ✅</h5>
+                        <p>Exclientes o clientes que desean reactivar su Cuenta Nu y tienen dudas sobre el proceso.</p>
+                    </div>
+                    
+                    <div class="case-item allowed">
+                        <h5>other.reactivate-request ✅</h5>
+                        <p>Exclientes o clientes que solicitan información para reactivar la Tarjeta de Crédito Nu.</p>
+                    </div>
+                    
+                    <div class="case-item allowed">
+                        <h5>acquisition.offer-product.basic.onboarding ✅</h5>
+                        <p>Clientes con preguntas sobre las "misiones" del entrenamiento básico del producto que se les ofertó.</p>
+                    </div>
+                    
+                    <div class="case-item allowed">
+                        <h5>notification.unsubscribe ✅</h5>
+                        <p>Prospectos o clientes que quieren saber cómo activar o desactivar notificaciones no obligatorias (App, Email, SMS, WhatsApp).</p>
+                    </div>
+                    
+                    <div class="case-item allowed">
+                        <h5>others.referrals ✅</h5>
+                        <p>Preguntas sobre cómo invitar a amigos/familiares (referidos) o inconvenientes con el proceso de invitación.</p>
+                    </div>
+                    
+                    <div class="case-item allowed">
+                        <h5>others.app-issues ✅</h5>
+                        <p>Clientes con preguntas sobre el panel de destacados o que reportan problemas visuales en la pantalla principal de la aplicación.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ejemplos Visuales -->
+    <div class="modal" id="visualExamplesModal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h2>👁️ Ejemplos Visuales - Frases de Clientes</h2>
+                <button class="modal-close" onclick="closeModal('visualExamplesModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="examples-content">
+                    <div class="usage-tip">
+                        <h4>💡 Cómo usar estos ejemplos:</h4>
+                        <p>Estos son ejemplos reales de cómo los clientes expresan sus consultas. Úsalos para identificar rápidamente el tipo de caso y proporcionar la respuesta más apropiada.</p>
+                    </div>
+
+                    <div class="example-category">
+                        <h4>📝 Inscripción y registro al mundo Nu (acquisition.first-time-application)</h4>
+                        <ul class="example-phrases">
+                            <li>"¿Qué necesito para sacar la tarjeta?"</li>
+                            <li>"Quiero abrir una cuenta, ¿cuáles son los requisitos?"</li>
+                            <li>"Ayuda para registrarme en la página."</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-category">
+                        <h4>💰 Inscripción y registro CDTs (acquisition.cdts_doubts)</h4>
+                        <ul class="example-phrases">
+                            <li>"¿Cómo puedo invertir en un CDT con ustedes?"</li>
+                            <li>"¿Qué documentos necesito para un CDT?"</li>
+                            <li>"¿Por qué tengo que abrir una Cuenta Nu para el CDT?"</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-category">
+                        <h4>❌ Producto Declinado o Sin Oferta (acquisition.soft-decline)</h4>
+                        <ul class="example-phrases">
+                            <li>"¿Por qué me rechazaron la solicitud?"</li>
+                            <li>"Quiero saber por qué me negaron la tarjeta."</li>
+                            <li>"Soy cliente de Cuenta Nu, ¿por qué no me ofrecen la tarjeta?"</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-category">
+                        <h4>⚠️ Inconvenientes en el Proceso de Adquisición (acquisition.invite)</h4>
+                        <ul class="example-phrases">
+                            <li>"La app se cierra cuando intento tomar la foto de mi cédula."</li>
+                            <li>"No reconoce mi dirección y no puedo avanzar."</li>
+                            <li>"Me aparece un error que dice 'Algo salió mal'."</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-category">
+                        <h4>🚫 Prospecto Desiste del Proceso (acquisition.opt-out)</h4>
+                        <ul class="example-phrases">
+                            <li>"Ya no quiero seguir con el proceso, quiero cancelarlo."</li>
+                            <li>"Me arrepentí, ¿cómo elimino mi solicitud?"</li>
+                            <li>"Por favor, borren mis datos, ya no me interesa el producto."</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-category">
+                        <h4>🤔 Producto Ofertado No Deseado (acquisition.unwanted-product-offer)</h4>
+                        <ul class="example-phrases">
+                            <li>"¿Por qué me dieron una cuenta si yo pedí la tarjeta de crédito?"</li>
+                            <li>"Yo solo quería la tarjeta, no la cuenta."</li>
+                            <li>"¿Cuál es el cupo de mi tarjeta? (Prospecto que solo tiene Cuenta Nu)."</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-category">
+                        <h4>❓ Preguntas por Productos No Ofertados (acquisition.new-products-request)</h4>
+                        <ul class="example-phrases">
+                            <li>"¿Cómo puedo solicitar una tarjeta amparada?"</li>
+                            <li>"¿Manejan préstamos personales?"</li>
+                            <li>"¿Tienen cuentas para menores de edad?"</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-category">
+                        <h4>📋 Contactos Relacionados con Regsol / PEPs (regsol.pep-edd-contacts)</h4>
+                        <ul class="example-phrases">
+                            <li>"Me llegó un correo pidiéndome más documentos, ¿es seguro?"</li>
+                            <li>"¿Por qué me piden mi declaración de renta?"</li>
+                            <li>"Mis productos aparecen bloqueados."</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-category">
+                        <h4>➕ Adquisición de Productos Adicionales (acquisition.cross-sell)</h4>
+                        <ul class="example-phrases">
+                            <li>"Ya tengo Cuenta Nu, ¿cómo obtengo la tarjeta de crédito?"</li>
+                            <li>"En la app me aparece una oferta para la tarjeta, ¿cómo la acepto?"</li>
+                            <li>"No me aparece el banner para adquirir la Cuenta Nu."</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-category">
+                        <h4>🔄 Reactivación de Cuenta Nu (other.reactivate-request-savings)</h4>
+                        <ul class="example-phrases">
+                            <li>"Cancelé mi Cuenta Nu y quiero volver a tenerla."</li>
+                            <li>"¿Cómo puedo reactivar mi cuenta de ahorros?"</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-category">
+                        <h4>💳 Reactivación de Tarjeta de Crédito Nu (other.reactivate-request)</h4>
+                        <ul class="example-phrases">
+                            <li>"Cancelé mi tarjeta de crédito y ahora la quiero de nuevo."</li>
+                            <li>"¿Es posible reactivar mi tarjeta?"</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-category">
+                        <h4>🎯 Dudas sobre Misiones de Activación (acquisition.offer-product.basic.onboarding)</h4>
+                        <ul class="example-phrases">
+                            <li>"¿Para qué sirven las misiones que me aparecen en la app?"</li>
+                            <li>"El botón para hacer una misión no me funciona."</li>
+                            <li>"No me muestra el progreso de las misiones."</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-category">
+                        <h4>🔕 Desuscribirse de Notificaciones (notification.unsubscribe)</h4>
+                        <ul class="example-phrases">
+                            <li>"No quiero recibir más correos promocionales."</li>
+                            <li>"¿Cómo desactivo las notificaciones de la app?"</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-category">
+                        <h4>👥 MGM - Invitar Amigos / Referidos (others.referrals)</h4>
+                        <ul class="example-phrases">
+                            <li>"¿Cómo puedo invitar a un amigo a Nu?"</li>
+                            <li>"Le envié el link a un amigo pero no le funciona."</li>
+                            <li>"¿Hay algún beneficio por referir personas?"</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-category">
+                        <h4>📱 Visualización de la Pantalla Principal (others.app-issues)</h4>
+                        <ul class="example-phrases">
+                            <li>"Los botones de mi app se ven desordenados."</li>
+                            <li>"A mi amigo le aparecen opciones que a mí no."</li>
+                            <li>"No encuentro el botón para ver el detalle de mis productos."</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-category">
+                        <h4>💳 Tarjeta de crédito NuControl (acquisition_fee_card_general_doubts)</h4>
+                        <ul class="example-phrases">
+                            <li>"¿Qué es la tarjeta NuControl?"</li>
+                            <li>"Me ofrecieron una tarjeta con cuota de manejo, ¿por qué?"</li>
+                            <li>"¿Qué beneficios y condiciones tiene la NuControl?"</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- AI Configuration Modal -->
+    <div class="modal" id="aiConfigModal">
+        <div class="modal-content ai-config-modal">
+            <div class="modal-header">
+                <h3>🤖 Configuración de IA</h3>
+                <span class="modal-close" onclick="closeModal('aiConfigModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="ai-config-container">
+                    <div class="config-section">
+                        <h4>Estado de la Conexión</h4>
+                        <div class="connection-status" id="aiConnectionStatus">
+                            <span class="status-indicator" id="statusIndicator">⚪</span>
+                            <span id="statusText">Verificando...</span>
+                        </div>
+                    </div>
+
+                    <div class="config-section">
+                        <h4>Configuración del Servidor</h4>
+                        <div class="form-group">
+                            <label for="litellmUrl">URL del Proxy LiteLLM:</label>
+                            <input type="text" id="litellmUrl" placeholder="http://localhost:4000" value="http://localhost:4000">
+                        </div>
+                        <div class="form-group">
+                            <label for="apiKey">API Key:</label>
+                            <input type="password" id="apiKey" placeholder="tu-api-key-aqui">
+                        </div>
+                        <div class="form-group">
+                            <label for="aiModel">Modelo:</label>
+                            <select id="aiModel">
+                                <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                                <option value="gpt-4">GPT-4</option>
+                                <option value="gemini-pro">Gemini Pro</option>
+                                <option value="claude-3-sonnet">Claude 3 Sonnet</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="config-section">
+                        <h4>Configuración Avanzada</h4>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="enableFallback" checked>
+                                Activar respaldo automático (usar templates si IA falla)
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="enableCache" checked>
+                                Activar caché de respuestas
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="config-section">
+                        <h4>Estadísticas</h4>
+                        <div class="ai-stats" id="aiStats">
+                            <div class="stat-item">
+                                <span class="stat-label">Respuestas generadas:</span>
+                                <span class="stat-value" id="responsesGenerated">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Caché utilizado:</span>
+                                <span class="stat-value" id="cacheHits">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Tiempo promedio:</span>
+                                <span class="stat-value" id="avgResponseTime">0ms</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="config-actions">
+                        <button class="config-btn secondary" onclick="testAIConnection()">🔍 Probar Conexión</button>
+                        <button class="config-btn secondary" onclick="clearAICache()">🗑️ Limpiar Caché</button>
+                        <button class="config-btn primary" onclick="saveAIConfig()">💾 Guardar Configuración</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>    <script src="app.js"></script>
+</body>
+</html>

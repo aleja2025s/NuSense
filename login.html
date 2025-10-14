@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NuSense AIgent - Login</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="login-page">
+    <!-- Nu Decoration Elements -->
+    <div class="nu-decoration"></div>
+    <div class="mobile-decoration"></div>
+    
+    <div class="login-container">
+        <div class="login-card">
+            <div class="logo-section">
+                <div class="logo">
+                    <div class="nu-logo">nu</div>
+                    <h1>NuSense AIgent</h1>
+                </div>
+                <p class="tagline">Tu asistente inteligente para servicio al cliente</p>
+            </div>
+            
+            <form class="login-form" id="loginForm">
+                <div class="form-group">
+                    <label for="username">Usuario</label>
+                    <input type="text" id="username" name="username" value="admin" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <input type="password" id="password" name="password" value="Nu2024*" required>
+                </div>
+                
+                <button type="submit" class="login-btn">
+                    <span>Iniciar Sesión</span>
+                    <div class="loader hidden"></div>
+                </button>
+            </form>
+            
+            <div class="login-footer">
+                <p>¿Problemas de acceso? Contacta a soporte IT</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Verificar si ya está logueado y evitar bucle
+        if (localStorage.getItem('nusense_logged_in') === 'true' && 
+            !window.location.search.includes('logout')) {
+            console.log('🔓 Already logged in, redirecting to app...');
+            window.location.href = 'app.html';
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('✅ DOM Loaded - Setting up login form');
+            
+            const loginForm = document.getElementById('loginForm');
+            if (!loginForm) {
+                console.error('❌ Login form not found!');
+                return;
+            }
+            
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                console.log('🔑 Login form submitted');
+                
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                
+                console.log('👤 Username:', username);
+                console.log('🔒 Password length:', password.length);
+                
+                // Credenciales válidas
+                if ((username === 'admin' && password === 'Nu2024*') ||
+                    (username === 'agente' && password === 'Nu2024')) {
+                    console.log('✅ Credentials valid, logging in...');
+                    localStorage.setItem('nusense_logged_in', 'true');
+                    localStorage.setItem('nusense_username', username);
+                    window.location.href = 'app.html?user=' + encodeURIComponent(username);
+                } else {
+                    console.log('❌ Invalid credentials');
+                    alert('Credenciales incorrectas. Intenta con:\nUsuario: admin, Contraseña: Nu2024*\nUsuario: agente, Contraseña: Nu2024');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
