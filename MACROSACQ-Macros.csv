@@ -1,0 +1,101 @@
+Tipo,Categoria,Titulo,Contenido,Keywords,Emociones
+ACQ,Registro,[ACQ] - Registro: Documentos necesarios,"Para el proceso de registro en Nu necesitas uno de estos documentos:
+
+✅ **Documentos aceptados:**
+• Cédula de Ciudadanía (vigente)
+• Cédula de Extranjería (vigente) 
+• Pasaporte (vigente)
+
+📋 **Requisitos:**
+• Documento completamente legible
+• Sin fechas de vencimiento
+• Información personal completa
+
+El proceso de validación toma 24-48 horas hábiles.","registro,documentos,cédula,identificación","confundido,molesto,preocupado"
+
+ACQ,Financiero,[ACQ] - Retiros: Uso tarjeta exterior,"Tu tarjeta débito Nu funciona internacionalmente:
+
+💳 **Retiros en exterior:**
+• Disponible en cajeros con logos Visa/Mastercard
+• Se aplican comisiones según tarifario vigente
+• Notifica tu viaje para evitar bloqueos por seguridad
+• Límites diarios según tu perfil de cuenta
+
+💰 **Comisiones:**
+• Consulta el tarifario vigente en la app
+• Tipo de cambio aplicado al momento de transacción","retiros,exterior,viaje,tarjeta,débito,internacional","neutro,preocupado"
+
+ACQ,Datos,[ACQ] - Data policy: Tratamiento de datos,"Tu privacidad es importante para nosotros:
+
+🔒 **Tus derechos:**
+• Conocer qué datos personales tenemos
+• Solicitar corrección de información incorrecta
+• Solicitar eliminación (según legislación aplicable)
+• Restricción del uso de tus datos
+
+📧 **Cómo ejercer derechos:**
+• Contacta a través de canales oficiales
+• Presenta solicitud por escrito
+• Respuesta máximo en 15 días hábiles","datos,privacidad,información,derechos,política","preocupado,molesto"
+
+ACQ,Registro,[ACQ] - Proceso: Validación registro,"El proceso de validación incluye:
+
+⏱️ **Tiempos:**
+• Registro inicial: 5-10 minutos
+• Validación completa: 24-48 horas hábiles
+• Notificación automática al completarse
+
+🔍 **Verificación:**
+• Autenticidad del documento
+• Coincidencia de datos personales
+• Cumplimiento de requisitos legales","validación,proceso,verificación,tiempo,registro","preocupado,confundido"
+
+ACQ,Soporte,[ACQ] - Registro: Problemas documento,"Si tienes problemas con tu documento:
+
+⚠️ **Problemas comunes:**
+• Documento borroso o poco legible
+• Información no coincide
+• Documento vencido
+
+✅ **Soluciones:**
+• Toma foto con buena iluminación
+• Asegúrate que esté vigente
+• Verifica que datos coincidan exactamente
+• Contacta soporte si persiste el problema","documento,problemas,foto,legible,vigente","molesto,preocupado"
+
+MGM,Invitación,[MGM] - Invitar amigos: Cómo funciona,"Invita amigos a Nu y ambos reciben beneficios:
+
+🎁 **Beneficios:**
+• Tú recibes bonificación por invitación
+• Tu amigo obtiene beneficios de bienvenida
+• Programa de referidos acumulativo
+
+📱 **Cómo invitar:**
+• Usa tu código de invitación personal
+• Comparte el link desde la app
+• Tu amigo debe completar registro exitosamente","invitar,amigos,referidos,código,beneficios","satisfecho,neutro"
+
+ACQ,Cuenta,[ACQ] - Cuenta: Activación y límites,"Información sobre tu cuenta Nu:
+
+📊 **Límites iniciales:**
+• Depósitos: Según validación de perfil
+• Retiros: Límites diarios configurables
+• Transferencias: Según nivel de cuenta
+
+🔓 **Aumentar límites:**
+• Completa verificación de identidad
+• Mantén buen historial crediticio
+• Solicita aumento través de la app","cuenta,límites,activación,depósitos,retiros","neutro,preocupado"
+
+ACQ,Registro,[ACQ] - Registro: Después poner dirección,"Después de registrarte exitosamente:
+
+🏠 **Actualizar dirección:**
+• Ingresa a tu perfil en la app
+• Selecciona ""Actualizar información""
+• Proporciona dirección completa y actualizada
+• Sube comprobante de domicilio (recibo servicios)
+
+📍 **Requisitos dirección:**
+• Debe ser actual y verificable
+• Comprobante no mayor a 3 meses
+• Información clara y legible","dirección,domicilio,actualizar,comprobante","neutro,confundido"
