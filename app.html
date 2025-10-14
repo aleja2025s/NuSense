@@ -79,6 +79,29 @@
                                         ✨ Mejorar Respuesta
                                     </button>
                                 </div>
+                                
+                                <!-- Área de respuesta de IA -->
+                                <div class="ai-response-area" id="aiResponseArea" style="display: none;">
+                                    <h5>📝 Respuesta Generada por IA:</h5>
+                                    <textarea 
+                                        class="ai-response-output" 
+                                        id="aiResponseOutput"
+                                        placeholder="La respuesta de IA aparecerá aquí..."
+                                        readonly></textarea>
+                                    <div class="ai-response-actions">
+                                        <button class="copy-ai-btn" id="copyAiBtn">📋 Copiar Respuesta</button>
+                                        <button class="use-ai-btn" id="useAiBtn">✅ Usar Esta Respuesta</button>
+                                        <button class="copy-macro-btn" id="copyMacroBtn" style="display: none;">📄 Copiar Macro</button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Área de macros relacionadas -->
+                                <div class="macros-area" id="macrosArea" style="display: none;">
+                                    <h5>📋 Macros Relacionadas:</h5>
+                                    <div class="macros-grid" id="macrosGrid">
+                                        <!-- Las macros aparecerán aquí como botones -->
+                                    </div>
+                                </div>
                             </div>
                         </div>
 

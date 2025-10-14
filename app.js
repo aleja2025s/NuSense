@@ -121,6 +121,10 @@ class NuSenseApp {
                 this.selectedTopic = card.dataset.topic;
                 this.showProcessSummary();
                 this.updateGenerateButton();
+                
+                // 🤖 Generar automáticamente contexto de IA para el tema seleccionado
+                const topicTitle = card.querySelector('.topic-title').textContent;
+                this.generateTopicAIContext(this.selectedTopic, topicTitle);
             });
         });
 
@@ -2438,6 +2442,9 @@ class NuSenseApp {
         
         const aiGenerateBtn = document.getElementById('aiGenerateBtn');
         const improveBtn = document.getElementById('improveResponseBtn');
+        const copyAiBtn = document.getElementById('copyAiBtn');
+        const useAiBtn = document.getElementById('useAiBtn');
+        const copyMacroBtn = document.getElementById('copyMacroBtn');
         
         if (aiGenerateBtn) {
             aiGenerateBtn.addEventListener('click', () => this.generateAIResponse());
@@ -2446,11 +2453,24 @@ class NuSenseApp {
         if (improveBtn) {
             improveBtn.addEventListener('click', () => this.improveResponse());
         }
+        
+        if (copyAiBtn) {
+            copyAiBtn.addEventListener('click', () => this.copyAIResponse());
+        }
+        
+        if (useAiBtn) {
+            useAiBtn.addEventListener('click', () => this.useAIResponse());
+        }
+        
+        if (copyMacroBtn) {
+            copyMacroBtn.addEventListener('click', () => this.copySelectedMacro());
+        }
     }
 
     async generateAIResponse() {
         const contextInput = document.getElementById('contextInput');
-        const responseOutput = document.getElementById('responseOutput');
+        const aiResponseOutput = document.getElementById('aiResponseOutput');
+        const aiResponseArea = document.getElementById('aiResponseArea');
         const aiBtn = document.getElementById('aiGenerateBtn');
         const loader = aiBtn.querySelector('.ai-loader');
         
@@ -2463,6 +2483,10 @@ class NuSenseApp {
         aiBtn.disabled = true;
         loader.classList.remove('hidden');
         
+        // Mostrar área de respuesta
+        aiResponseArea.style.display = 'block';
+        aiResponseOutput.value = 'Generando respuesta con IA...';
+        
         // Simular procesamiento IA
         await new Promise(resolve => setTimeout(resolve, 1500));
         
@@ -2472,13 +2496,13 @@ class NuSenseApp {
             
             const aiResponse = this.generateLocalAIResponse(contextInput.value, emotion);
             
-            // Efecto de escritura
-            responseOutput.value = '';
-            await this.typeWriter(responseOutput, aiResponse, 30);
+            // Efecto de escritura en el área de IA
+            aiResponseOutput.value = '';
+            await this.typeWriter(aiResponseOutput, aiResponse, 30);
             
         } catch (error) {
             console.error('Error IA:', error);
-            responseOutput.value = 'Error generando respuesta. Inténtalo de nuevo.';
+            aiResponseOutput.value = 'Error generando respuesta. Inténtalo de nuevo.';
         } finally {
             aiBtn.disabled = false;
             loader.classList.add('hidden');
@@ -2543,16 +2567,126 @@ class NuSenseApp {
     }
 
     async improveResponse() {
-        const responseOutput = document.getElementById('responseOutput');
+        const aiResponseOutput = document.getElementById('aiResponseOutput');
         
-        if (!responseOutput.value.trim()) {
-            alert('Primero genera o escribe una respuesta');
+        if (!aiResponseOutput.value.trim()) {
+            alert('Primero genera una respuesta con IA');
             return;
         }
         
         // Mejorar respuesta localmente
-        const improved = this.improveLocalResponse(responseOutput.value);
-        await this.typeWriter(responseOutput, improved, 30);
+        const improved = this.improveLocalResponse(aiResponseOutput.value);
+        await this.typeWriter(aiResponseOutput, improved, 30);
+    }
+
+    async copyAIResponse() {
+        const aiResponseOutput = document.getElementById('aiResponseOutput');
+        
+        if (!aiResponseOutput.value.trim()) {
+            alert('No hay respuesta para copiar');
+            return;
+        }
+        
+        try {
+            await navigator.clipboard.writeText(aiResponseOutput.value);
+            
+            // Feedback visual
+            const copyBtn = document.getElementById('copyAiBtn');
+            const originalText = copyBtn.innerHTML;
+            copyBtn.innerHTML = '✅ Copiado';
+            copyBtn.style.background = 'rgba(46, 204, 113, 0.8)';
+            
+            setTimeout(() => {
+                copyBtn.innerHTML = originalText;
+                copyBtn.style.background = 'rgba(255, 255, 255, 0.2)';
+            }, 2000);
+            
+        } catch (err) {
+            alert('Error al copiar. Selecciona el texto manualmente.');
+        }
+    }
+
+    async useAIResponse() {
+        const aiResponseOutput = document.getElementById('aiResponseOutput');
+        const responseOutput = document.getElementById('responseOutput');
+        
+        if (!aiResponseOutput.value.trim()) {
+            alert('No hay respuesta para usar');
+            return;
+        }
+        
+        // Copiar respuesta de IA al área principal
+        if (responseOutput) {
+            await this.typeWriter(responseOutput, aiResponseOutput.value, 20);
+            
+            // Feedback visual
+            const useBtn = document.getElementById('useAiBtn');
+            const originalText = useBtn.innerHTML;
+            useBtn.innerHTML = '✅ Respuesta Aplicada';
+            useBtn.style.background = 'rgba(46, 204, 113, 1)';
+            
+            setTimeout(() => {
+                useBtn.innerHTML = originalText;
+                useBtn.style.background = 'rgba(46, 204, 113, 0.8)';
+            }, 2000);
+        }
+    }
+
+    async copySelectedMacro() {
+        if (!this.currentTopicMacros || this.currentTopicMacros.length === 0) {
+            alert('No hay macros disponibles para copiar');
+            return;
+        }
+        
+        // Si hay una sola macro, copiarla directamente
+        if (this.currentTopicMacros.length === 1) {
+            const macro = this.currentTopicMacros[0];
+            try {
+                await navigator.clipboard.writeText(macro.content);
+                
+                // Feedback visual
+                const copyBtn = document.getElementById('copyMacroBtn');
+                const originalText = copyBtn.innerHTML;
+                copyBtn.innerHTML = '✅ Macro Copiada';
+                copyBtn.style.background = 'rgba(46, 204, 113, 0.8)';
+                
+                setTimeout(() => {
+                    copyBtn.innerHTML = originalText;
+                    copyBtn.style.background = 'rgba(255, 165, 0, 0.8)';
+                }, 2000);
+                
+            } catch (err) {
+                alert('Error al copiar macro. Inténtalo manualmente.');
+            }
+        } else {
+            // Si hay múltiples macros, mostrar selector
+            this.showMacroSelector();
+        }
+    }
+
+    showMacroSelector() {
+        const macroOptions = this.currentTopicMacros.map((macro, index) => 
+            `${index + 1}. ${macro.title}`
+        ).join('\n');
+        
+        const selection = prompt(
+            `Selecciona qué macro copiar (escribe el número):\n\n${macroOptions}`,
+            '1'
+        );
+        
+        if (selection) {
+            const index = parseInt(selection) - 1;
+            if (index >= 0 && index < this.currentTopicMacros.length) {
+                const selectedMacro = this.currentTopicMacros[index];
+                navigator.clipboard.writeText(selectedMacro.content).then(() => {
+                    alert(`Macro copiada: "${selectedMacro.title}"`);
+                }).catch(() => {
+                    alert('Error al copiar. Inténtalo manualmente.');
+                });
+            } else {
+                alert('Número inválido. Inténtalo de nuevo.');
+            }
+        }
     }
 
     improveLocalResponse(originalResponse) {
@@ -2579,10 +2713,289 @@ class NuSenseApp {
 
     async typeWriter(element, text, speed = 30) {
         element.value = '';
+        
+        // Para textos largos con formato, mostrarlo inmediatamente
+        if (text.length > 500) {
+            element.value = text;
+            return;
+        }
+        
+        // Para textos cortos, usar efecto de escritura
         for (let i = 0; i < text.length; i++) {
             element.value += text.charAt(i);
             await new Promise(resolve => setTimeout(resolve, speed));
         }
+    }
+
+    // 🤖 Generar contexto automático de IA basado en el tema seleccionado
+    async generateTopicAIContext(topic, topicTitle) {
+        console.log(`🎯 Generando contexto IA para tema: ${topic} - ${topicTitle}`);
+        
+        const aiResponseOutput = document.getElementById('aiResponseOutput');
+        const aiResponseArea = document.getElementById('aiResponseArea');
+        const contextInput = document.getElementById('contextInput');
+        const macrosArea = document.getElementById('macrosArea');
+        const macrosGrid = document.getElementById('macrosGrid');
+        
+        if (!aiResponseOutput || !aiResponseArea) return;
+        
+        // Mostrar área de IA
+        aiResponseArea.style.display = 'block';
+        aiResponseOutput.value = 'Generando información del tema y macros relacionadas...';
+        
+        // Simular procesamiento
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Obtener macros relacionadas al tema
+        const relatedMacros = this.getRelatedMacros(topic);
+        this.currentTopicMacros = relatedMacros; // Guardar para uso posterior
+        
+        // Mostrar macros como tarjetas si hay macros disponibles
+        if (relatedMacros.length > 0 && macrosArea && macrosGrid) {
+            macrosArea.style.display = 'block';
+            this.displayMacroCards(relatedMacros, macrosGrid);
+        } else if (macrosArea) {
+            macrosArea.style.display = 'none';
+        }
+        
+        // Generar información específica del tema SIN macros en el texto
+        const topicInfo = this.getTopicInformation(topic, topicTitle);
+        
+        // Mostrar información con efecto de escritura
+        await this.typeWriter(aiResponseOutput, topicInfo, 25);
+        
+        // También llenar el contexto si está vacío
+        if (!contextInput.value.trim()) {
+            const sampleContext = this.getTopicSampleContext(topic);
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await this.typeWriter(contextInput, sampleContext, 40);
+        }
+    }
+
+    // 🎯 Obtener macros relacionadas al tema seleccionado
+    getRelatedMacros(topic) {
+        const relatedMacros = this.macrosData.filter(macro => macro.category === topic);
+        console.log(`📋 Encontradas ${relatedMacros.length} macros para tema: ${topic}`);
+        return relatedMacros.slice(0, 3); // Máximo 3 macros para no saturar
+    }
+
+    // 📋 Mostrar macros como tarjetas seleccionables
+    displayMacroCards(macros, container) {
+        container.innerHTML = '';
+        
+        macros.forEach((macro, index) => {
+            const macroCard = document.createElement('div');
+            macroCard.className = 'macro-card';
+            macroCard.dataset.macroId = macro.id;
+            
+            macroCard.innerHTML = `
+                <div class="macro-title">${macro.title}</div>
+                <div class="macro-preview">${macro.content.substring(0, 150)}${macro.content.length > 150 ? '...' : ''}</div>
+                <div class="macro-actions">
+                    <button class="macro-copy-btn" onclick="app.copyMacroContent('${macro.id}')">📋 Copiar</button>
+                    <button class="macro-use-btn" onclick="app.useMacroContent('${macro.id}')">✅ Usar</button>
+                </div>
+            `;
+            
+            // Agregar evento de selección
+            macroCard.addEventListener('click', (e) => {
+                // No activar si se hizo clic en un botón
+                if (e.target.tagName === 'BUTTON') return;
+                
+                // Remover selección de otras tarjetas
+                container.querySelectorAll('.macro-card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+                
+                // Seleccionar esta tarjeta
+                macroCard.classList.add('selected');
+                this.selectedMacro = macro;
+                
+                console.log(`📋 Macro seleccionada: ${macro.title}`);
+            });
+            
+            container.appendChild(macroCard);
+        });
+    }
+
+    // 📋 Copiar contenido de macro específica
+    async copyMacroContent(macroId) {
+        const macro = this.macrosData.find(m => m.id === macroId);
+        if (!macro) return;
+        
+        try {
+            await navigator.clipboard.writeText(macro.content);
+            
+            // Feedback visual en el botón específico
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '✅ Copiado';
+            btn.style.background = 'rgba(46, 204, 113, 0.8)';
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.style.background = 'rgba(255, 255, 255, 0.2)';
+            }, 2000);
+            
+        } catch (err) {
+            alert('Error al copiar macro. Inténtalo manualmente.');
+        }
+    }
+
+    // ✅ Usar contenido de macro específica
+    async useMacroContent(macroId) {
+        const macro = this.macrosData.find(m => m.id === macroId);
+        if (!macro) return;
+        
+        const responseOutput = document.getElementById('responseOutput');
+        if (responseOutput) {
+            await this.typeWriter(responseOutput, macro.content, 20);
+            
+            // Feedback visual
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '✅ Aplicado';
+            btn.style.background = 'rgba(46, 204, 113, 1)';
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.style.background = 'rgba(46, 204, 113, 0.6)';
+            }, 2000);
+        }
+    }
+
+    getTopicInformation(topic, topicTitle) {
+        const topicGuides = {
+            'inscripcion-registro': `📋 INSCRIPCIÓN Y REGISTRO
+
+INFORMACIÓN CLAVE:
+• Proceso de registro: Validación de identidad, datos personales y documentos
+• Requisitos: INE vigente, comprobante de ingresos, CURP
+• Tiempo estimado: 5-10 minutos para completar registro
+• Validación: Puede tomar 24-48 horas hábiles
+
+RESPUESTAS COMUNES:
+• "Te ayudo con el proceso de registro paso a paso"
+• "Los documentos necesarios son INE, comprobante de ingresos y CURP"
+• "El proceso de validación toma entre 24-48 horas hábiles"
+
+PUNTOS IMPORTANTES:
+• Verificar que la foto de INE sea clara y legible
+• Comprobar que los datos coincidan exactamente
+• Explicar proceso de validación si hay demoras
+
+💡 TIP: Revisa las macros relacionadas abajo para respuestas específicas.`,
+
+            'mgm-referidos': `👥 INVITAR AMIGOS (MGM)
+
+INFORMACIÓN CLAVE:
+• Programa "Invita y Gana": Beneficios por referir amigos
+• Beneficio referido: $200 pesos por cada amigo que se registre
+• Beneficio para el amigo: $200 pesos de bienvenida
+• Límite: Hasta 10 referidos por mes
+
+RESPUESTAS COMUNES:
+• "Por cada amigo que invites y se registre, ambos reciben $200 pesos"
+• "Puedes invitar hasta 10 amigos por mes"
+• "El beneficio se acredita cuando tu amigo complete su primer depósito"
+
+PUNTOS IMPORTANTES:
+• El amigo debe usar tu código de referido
+• Ambos deben completar el proceso de registro
+• Los beneficios se acreditan en 5-7 días hábiles
+
+💡 TIP: Revisa las macros relacionadas abajo para respuestas específicas.`,
+
+            'activacion-productos': `🔓 ACTIVACIÓN DE PRODUCTOS
+
+INFORMACIÓN CLAVE:
+• Activación de cuenta Nu: Inmediata tras validación
+• Activación de tarjeta: Requiere primer depósito de $100
+• Configuración de límites: Personalizable desde la app
+• Activación de servicios adicionales: Transferencias, pagos, etc.
+
+RESPUESTAS COMUNES:
+• "Tu cuenta se activa automáticamente tras la validación"
+• "Para activar tu tarjeta necesitas hacer un depósito mínimo de $100"
+• "Puedes configurar tus límites desde la app Nu"
+
+PUNTOS IMPORTANTES:
+• Explicar diferencia entre activación de cuenta y tarjeta
+• Mencionar beneficios de cada producto
+• Guiar en configuración de límites de seguridad
+
+💡 TIP: Revisa las macros relacionadas abajo para respuestas específicas.`,
+
+            'nucontrol-registro': `💳 NUCONTROL
+
+INFORMACIÓN CLAVE:
+• NuControl: Tarjeta de crédito sin anualidad
+• Requisitos: Ingresos mínimos $8,000 mensuales
+• Límite inicial: Desde $1,000 hasta $50,000
+• Sin historial crediticio requerido
+
+RESPUESTAS COMUNES:
+• "NuControl es nuestra tarjeta de crédito sin anualidad"
+• "El límite se asigna según tu perfil, desde $1,000"
+• "No necesitas historial crediticio previo"
+
+PUNTOS IMPORTANTES:
+• Enfatizar beneficio de sin anualidad
+• Explicar proceso de evaluación crediticia
+• Mencionar crecimiento gradual del límite
+
+💡 TIP: Revisa las macros relacionadas abajo para respuestas específicas.`,
+
+            'data-policy': `🔒 POLÍTICA DE DATOS
+
+INFORMACIÓN CLAVE:
+• Política de privacidad: Protección total de datos personales
+• Uso de datos: Solo para servicios financieros autorizados
+• Derechos ARCO: Acceso, Rectificación, Cancelación, Oposición
+• Seguridad: Cifrado bancario y autenticación biométrica
+
+RESPUESTAS COMUNES:
+• "Tus datos están protegidos con los más altos estándares de seguridad"
+• "Puedes ejercer tus derechos ARCO contactando a privacidad@nu.com.mx"
+• "Solo usamos tus datos para los servicios que autorizaste"
+
+PUNTOS IMPORTANTES:
+• Tranquilizar sobre seguridad de datos
+• Explicar derechos del usuario
+• Proporcionar contacto de privacidad si es necesario
+
+💡 TIP: Revisa las macros relacionadas abajo para respuestas específicas.`
+        };
+
+        return topicGuides[topic] || `📋 ${topicTitle.toUpperCase()}
+
+INFORMACIÓN DEL TEMA:
+Este tema requiere atención especializada. Te proporciono la información básica disponible.
+
+RECOMENDACIONES:
+• Escucha activamente la consulta del cliente
+• Pregunta detalles específicos para entender mejor
+• Ofrece soluciones paso a paso
+• Mantén un tono empático y profesional
+
+PRÓXIMOS PASOS:
+• Identifica la necesidad específica del cliente
+• Proporciona información clara y precisa
+• Ofrece seguimiento si es necesario
+
+💡 TIP: Revisa las macros relacionadas abajo para respuestas específicas.`;
+    }
+
+    getTopicSampleContext(topic) {
+        const sampleContexts = {
+            'inscripcion-registro': 'Cliente pregunta: "Quiero registrarme en Nu pero no sé qué documentos necesito. ¿Me puedes ayudar con el proceso?"',
+            'mgm-referidos': 'Cliente pregunta: "Mi amigo me dijo que si me registro con su código ambos ganamos dinero. ¿Cómo funciona exactamente?"',
+            'activacion-productos': 'Cliente dice: "Ya me registré pero no sé cómo activar mi tarjeta. ¿Qué necesito hacer?"',
+            'nucontrol-registro': 'Cliente pregunta: "Estoy interesado en la tarjeta de crédito NuControl. ¿Cuáles son los requisitos?"',
+            'data-policy': 'Cliente preocupado: "¿Qué hacen con mis datos personales? ¿Es seguro dar mi información?"'
+        };
+
+        return sampleContexts[topic] || 'Cliente consulta sobre: ' + topic;
     }
 }
 
