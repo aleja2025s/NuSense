@@ -59,6 +59,7 @@ class NuSenseApp {
         this.displayUserGreeting();
         this.initializeLiteLLM();
         this.initializeAcademy();
+        this.initializeAI(); // Inicializar IA
     }
 
     checkAuth() {
@@ -2429,6 +2430,159 @@ class NuSenseApp {
     
     startTrainingQuiz() {
         console.log("🎯 Training quiz started");
+    }
+
+    // IA Integration - Local AI
+    async initializeAI() {
+        console.log('🤖 Inicializando IA Local...');
+        
+        const aiGenerateBtn = document.getElementById('aiGenerateBtn');
+        const improveBtn = document.getElementById('improveResponseBtn');
+        
+        if (aiGenerateBtn) {
+            aiGenerateBtn.addEventListener('click', () => this.generateAIResponse());
+        }
+        
+        if (improveBtn) {
+            improveBtn.addEventListener('click', () => this.improveResponse());
+        }
+    }
+
+    async generateAIResponse() {
+        const contextInput = document.getElementById('contextInput');
+        const responseOutput = document.getElementById('responseOutput');
+        const aiBtn = document.getElementById('aiGenerateBtn');
+        const loader = aiBtn.querySelector('.ai-loader');
+        
+        if (!contextInput.value.trim()) {
+            alert('Por favor, ingresa el contexto del cliente primero');
+            return;
+        }
+        
+        // Mostrar loading
+        aiBtn.disabled = true;
+        loader.classList.remove('hidden');
+        
+        // Simular procesamiento IA
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        try {
+            const selectedEmotion = document.querySelector('.emotion-btn.active');
+            const emotion = selectedEmotion ? selectedEmotion.dataset.emotion : 'neutro';
+            
+            const aiResponse = this.generateLocalAIResponse(contextInput.value, emotion);
+            
+            // Efecto de escritura
+            responseOutput.value = '';
+            await this.typeWriter(responseOutput, aiResponse, 30);
+            
+        } catch (error) {
+            console.error('Error IA:', error);
+            responseOutput.value = 'Error generando respuesta. Inténtalo de nuevo.';
+        } finally {
+            aiBtn.disabled = false;
+            loader.classList.add('hidden');
+        }
+    }
+
+    generateLocalAIResponse(query, emotion = 'neutro') {
+        const keywords = {
+            tarjeta: {
+                neutro: "Entiendo tu consulta sobre la tarjeta Nu. Para ayudarte mejor, verifica que esté activada y que tengas saldo disponible. Si persiste el problema, puedo guiarte paso a paso para solucionarlo.",
+                molesto: "Lamento mucho la inconveniencia con tu tarjeta Nu. Comprendo tu frustración y te ayudo inmediatamente. Primero, revisemos juntos el estado de tu tarjeta para resolver esto rápidamente.",
+                confundido: "Te ayudo a entender cómo funciona tu tarjeta Nu. Es muy sencillo: primero verifica que esté activada en la app, luego confirma que tengas saldo. ¿Te guío paso a paso?",
+                satisfecho: "¡Excelente que uses tu tarjeta Nu! Me da gusto ayudarte. Para cualquier consulta sobre tu tarjeta, estoy aquí para apoyarte y hacer tu experiencia aún mejor.",
+                preocupado: "Comprendo tu preocupación sobre tu tarjeta Nu. Tranquilo, vamos a revisar todo juntos para asegurarnos de que funcione perfectamente. Te guío paso a paso."
+            },
+            transferencia: {
+                neutro: "Para realizar transferencias con Nu, puedes usar la app o la web. Necesitas los datos del destinatario y confirmar con tu clave. ¿En qué paso específico necesitas ayuda?",
+                molesto: "Entiendo tu frustración con las transferencias. Te ayudo inmediatamente a resolver esto. Las transferencias con Nu son seguras y rápidas, déjame guiarte para completarla sin problemas.",
+                confundido: "Las transferencias son muy fáciles con Nu. Te explico paso a paso: 1) Abre la app, 2) Selecciona 'Transferir', 3) Ingresa los datos, 4) Confirma. ¿Comenzamos?",
+                satisfecho: "¡Genial que uses las transferencias de Nu! Son súper rápidas y seguras. Te ayudo con cualquier duda para que tengas la mejor experiencia posible.",
+                preocupado: "Entiendo tu preocupación sobre las transferencias. Te aseguro que son muy seguras con Nu. Te explico todo el proceso para que te sientas completamente tranquilo."
+            },
+            saldo: {
+                neutro: "Para consultar tu saldo en Nu, puedes usar la app, web o cajeros. Tu saldo se actualiza en tiempo real. ¿Necesitas ayuda para acceder a alguna de estas opciones?",
+                molesto: "Comprendo tu preocupación por el saldo. Te ayudo inmediatamente a verificarlo. Con Nu puedes consultar tu saldo 24/7 sin costo. Déjame guiarte para que lo veas ahora mismo.",
+                confundido: "Ver tu saldo es súper fácil. Te muestro las opciones: 1) App Nu (más rápido), 2) Web nu.com.mx, 3) Cualquier cajero. ¿Cuál prefieres que te explique?",
+                satisfecho: "¡Excelente que monitorees tu saldo! Es una gran práctica financiera. Con Nu tienes múltiples formas de consultarlo. ¿Te muestro cuál es la más conveniente para ti?",
+                preocupado: "Comprendo tu preocupación por verificar tu saldo. Con Nu puedes consultarlo de forma segura las 24 horas. Te muestro las opciones más confiables."
+            },
+            bloqueo: {
+                neutro: "Si necesitas bloquear tu tarjeta Nu, puedes hacerlo inmediatamente desde la app o llamando a soporte. Es un proceso seguro y reversible. ¿Qué tipo de bloqueo necesitas?",
+                molesto: "Entiendo la urgencia de bloquear tu tarjeta. Tranquilo, podemos hacerlo inmediatamente. Nu protege tu dinero 24/7. Te guío para bloquearlo ahora mismo y resolver tu situación.",
+                confundido: "Bloquear tu tarjeta es un proceso de seguridad muy importante. Te explico las opciones: 1) Bloqueo temporal (puedes reactivar), 2) Bloqueo definitivo. ¿Cuál necesitas?",
+                satisfecho: "¡Qué bueno que seas proactivo con la seguridad! Bloquear preventivamente es muy inteligente. Te muestro cómo hacerlo rápido y fácil con Nu.",
+                preocupado: "Comprendo tu preocupación por la seguridad. Bloquear tu tarjeta es la decisión correcta. Te ayudo inmediatamente para que te sientas tranquilo."
+            }
+        };
+        
+        // Detectar palabra clave
+        const queryLower = query.toLowerCase();
+        let category = 'general';
+        
+        if (queryLower.includes('tarjeta') || queryLower.includes('card')) category = 'tarjeta';
+        else if (queryLower.includes('transferir') || queryLower.includes('enviar') || queryLower.includes('transfer')) category = 'transferencia';
+        else if (queryLower.includes('saldo') || queryLower.includes('dinero') || queryLower.includes('balance')) category = 'saldo';
+        else if (queryLower.includes('bloquear') || queryLower.includes('block') || queryLower.includes('cancelar')) category = 'bloqueo';
+        
+        if (keywords[category] && keywords[category][emotion]) {
+            return keywords[category][emotion];
+        }
+        
+        // Respuesta general
+        const generalResponses = {
+            neutro: "Gracias por contactar a Nu. He revisado tu consulta y te proporciono la información correspondiente. ¿Hay algo específico en lo que pueda ayudarte adicional?",
+            molesto: "Lamento mucho cualquier inconveniente que hayas experimentado. En Nu valoramos mucho tu confianza y queremos resolver tu situación inmediatamente. ¿Cómo puedo ayudarte mejor?",
+            confundido: "Te ayudo a aclarar tu duda paso a paso. En Nu queremos que tengas la mejor experiencia, así que te explico todo de manera sencilla. ¿Por dónde empezamos?",
+            satisfecho: "¡Me da mucho gusto poder ayudarte! En Nu estamos comprometidos con brindarte el mejor servicio. ¿En qué más puedo apoyarte para mejorar tu experiencia?",
+            preocupado: "Comprendo tu preocupación y quiero ayudarte a resolverla. En Nu estamos aquí para apoyarte en todo momento. Te explico todo lo que necesitas saber."
+        };
+        
+        return generalResponses[emotion] || generalResponses['neutro'];
+    }
+
+    async improveResponse() {
+        const responseOutput = document.getElementById('responseOutput');
+        
+        if (!responseOutput.value.trim()) {
+            alert('Primero genera o escribe una respuesta');
+            return;
+        }
+        
+        // Mejorar respuesta localmente
+        const improved = this.improveLocalResponse(responseOutput.value);
+        await this.typeWriter(responseOutput, improved, 30);
+    }
+
+    improveLocalResponse(originalResponse) {
+        // Mejoras automáticas
+        let improved = originalResponse;
+        
+        // Agregar empatía si no la tiene
+        if (!improved.includes('entiendo') && !improved.includes('comprendo') && !improved.includes('lamento')) {
+            improved = 'Entiendo tu situación. ' + improved;
+        }
+        
+        // Agregar siguiente paso si no lo tiene
+        if (!improved.includes('?') && !improved.includes('siguiente') && !improved.includes('ayudar')) {
+            improved += ' ¿Te gustaría que te ayude con algo más específico?';
+        }
+        
+        // Hacer más profesional
+        improved = improved.replace(/ok/gi, 'perfecto');
+        improved = improved.replace(/bye/gi, 'que tengas un excelente día');
+        improved = improved.replace(/hola/gi, 'Hola, es un gusto atenderte');
+        
+        return improved;
+    }
+
+    async typeWriter(element, text, speed = 30) {
+        element.value = '';
+        for (let i = 0; i < text.length; i++) {
+            element.value += text.charAt(i);
+            await new Promise(resolve => setTimeout(resolve, speed));
+        }
     }
 }
 
